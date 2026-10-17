@@ -1,0 +1,164 @@
+.route-lens {
+  background: #e9f4ed;
+  border: 1px solid #d2e5d8;
+  border-radius: 15px;
+  padding: clamp(19px, 3vw, 30px);
+  margin: 25px 0;
+}
+
+.route-lens-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 25px;
+  margin-bottom: 20px;
+}
+
+.route-lens-head h3 {
+  font-size: clamp(24px, 2.5vw, 33px);
+  margin: 8px 0 10px;
+  max-width: 650px;
+}
+
+.route-lens-head p {
+  color: #506a59;
+  font-size: 14px;
+  margin: 0;
+  max-width: 720px;
+}
+
+.route-lens-head label {
+  flex: 0 0 205px;
+  display: grid;
+  gap: 6px;
+  color: #315846;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.route-rule {
+  margin: 0 0 18px;
+  border-left: 3px solid #087f63;
+  padding: 9px 12px;
+  background: #dff0e4;
+  color: #335747;
+  font-size: 13px;
+}
+
+.route-rule code {
+  background: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #0b5e47;
+  white-space: nowrap;
+}
+
+.route-lens-head select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #abc8b5;
+  border-radius: 7px;
+  background: white;
+  color: #192722;
+}
+
+.route-chain {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.route-step {
+  position: relative;
+  min-width: 0;
+  padding: 17px 13px;
+  border: 1px solid #d5e3d8;
+  border-radius: 10px;
+  background: white;
+}
+
+.route-step:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -9px;
+  top: 45%;
+  z-index: 1;
+  color: #087f63;
+  font-weight: 900;
+  background: #e9f4ed;
+  line-height: 1;
+}
+
+.step-tag {
+  display: block;
+  margin-bottom: 12px;
+  color: #087f63;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.route-step code {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #183e2d;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.route-step p {
+  margin: 12px 0 0;
+  color: #557062;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.route-failed-before-call .route-step:nth-child(4) {
+  border-color: #d99b86;
+  background: #fff5ef;
+}
+
+.route-failed-before-call .route-step:nth-child(4) .step-tag {
+  color: #ad5637;
+}
+
+.route-lens-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px 0 0;
+}
+
+.route-lens-foot p {
+  color: #315b43;
+  font-size: 13px;
+  margin: 0;
+}
+
+.route-lens-foot button {
+  flex: 0 0 auto;
+}
+
+.route-assumption {
+  color: #687d6e;
+  font-size: 11px;
+  margin: 10px 0 0;
+}
+
+@media (max-width: 1120px) {
+  .route-chain { grid-template-columns: 1fr; }
+  .route-step:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    bottom: -11px;
+    right: 50%;
+  }
+}
+
+@media (max-width: 760px) {
+  .route-lens-head, .route-lens-foot { display: block; }
+  .route-lens-head label { margin-top: 18px; }
+  .route-lens-foot button { margin-top: 12px; }
+}

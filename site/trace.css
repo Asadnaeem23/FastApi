@@ -1,0 +1,40 @@
+.trace-panel {
+  border-top: 1px solid #355144;
+  margin-top: 18px;
+  padding-top: 18px;
+}
+
+.trace-panel h3 {
+  color: #eaf8ef;
+  font-size: 15px;
+  margin: 0 0 13px;
+}
+
+.trace-panel ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 11px;
+}
+
+.trace-panel li {
+  border-left: 2px solid #2c9c72;
+  padding-left: 13px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.trace-panel li strong,
+.trace-panel li span {
+  display: block;
+}
+
+.trace-panel li strong {
+  color: #b4f0d1;
+  margin-bottom: 2px;
+}
+
+.trace-panel li span {
+  color: #c4dccc;
+}

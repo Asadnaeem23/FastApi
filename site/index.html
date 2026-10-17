@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical, interactive guide to FastAPI fundamentals and a Student Management API.">
+  <title>FastAPI Field Guide · Modules 1–5</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="trace.css">
+  <link rel="stylesheet" href="route-lens.css">
+  <script src="simulator.js" defer></script>
+  <script src="script.js" defer></script>
+  <script src="route-walkthrough.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Course navigation">
+      <a class="brand" href="#top"><span class="brand-mark">F</span><span>FastAPI<br><small>Field Guide</small></span></a>
+      <p class="sidebar-label">FOUNDATIONS · 01—05</p>
+      <nav class="chapter-nav" aria-label="Modules">
+        <a href="#intro"><span>01</span> API fundamentals</a>
+        <a href="#setup"><span>02</span> Setup & first run</a>
+        <a href="#path"><span>03</span> Python & path values</a>
+        <a href="#query"><span>04</span> Query parameters</a>
+        <a href="#crud"><span>05</span> Build a CRUD API</a>
+        <a href="#lab"><span>↗</span> Request lab</a>
+        <a href="#practice"><span>✓</span> Check your understanding</a>
+      </nav>
+      <div class="sidebar-foot">One student scenario. Five connected ideas.<br><a href="#crud-example">Optional runnable example ↗</a></div>
+    </aside>
+
+    <main id="main">
+      <header class="topbar" id="top"><span class="eyebrow">LEARNING PATH / FASTAPI</span><span class="topbar-note">Python 3.10+ · Beginner to practical</span></header>
+      <div class="content">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy"><p class="kicker">THE INTERACTIVE STARTER GUIDE</p><h1 id="hero-title">Understand the request.<br><em>See what happens next.</em></h1><p class="lede">Learn where data comes from, how FastAPI interprets it, and what each CRUD operation changes. One student scenario connects the ideas, with diagrams, examples, and practice you can revisit.</p><div class="hero-actions"><a class="button primary" href="#intro">Start learning <span aria-hidden="true">→</span></a><a class="button secondary" href="#lab">Try the request lab</a></div></div>
+          <div class="hero-diagram" aria-label="Request flow from client through FastAPI to a JSON response"><div class="diagram-caption">A REQUEST, DECODED</div><div class="diagram-row"><span class="diagram-number">01</span><span>Client sends</span><code>GET /students/2</code></div><div class="diagram-arrow">↓</div><div class="diagram-row"><span class="diagram-number">02</span><span>FastAPI validates</span><code>student_id: int</code></div><div class="diagram-arrow">↓</div><div class="diagram-row"><span class="diagram-number">03</span><span>Your function returns</span><code>{"name": "Sara"}</code></div><div class="diagram-end"><span class="status-dot"></span> 200 OK · JSON response</div></div>
+        </section>
+        <div class="course-strip"><span>5 focused modules</span><span>Optional runnable example</span><span>Interactive request lab</span><span>Quiz + exercises</span></div>
+
+        <section class="lesson" id="intro"><div class="lesson-heading"><span class="module-number">01 / FUNDAMENTALS</span><h2>What an API actually does</h2><p>A frontend asks for data or requests a change. The API receives the HTTP request, runs server code, and sends back a response with a status code and often JSON.</p></div>
+          <div class="flow"><div><b>Client</b><small>Clicks “View result”</small></div><span>HTTP request →</span><div><b>FastAPI</b><small>Matches a route and runs Python</small></div><span>JSON response →</span><div><b>Client</b><small>Displays the result</small></div></div>
+          <div class="two-col"><article class="panel"><h3>HTTP methods express intent</h3><div class="method-grid"><span class="method get">GET</span><span>Read a student</span><span class="method post">POST</span><span>Create a student</span><span class="method put">PUT</span><span>Replace editable fields</span><span class="method patch">PATCH</span><span>Change selected fields</span><span class="method delete">DELETE</span><span>Remove a student</span></div></article><article class="panel"><h3>Your first endpoint</h3><pre><code>from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home() -> dict[str, str]:
+    return {"message": "Welcome to FastAPI"}</code></pre><p><code>@app.get("/")</code> registers a GET route. The function runs for a matching request; FastAPI serializes the returned dictionary as JSON. A return annotation describes the value but does not return it.</p></article></div>
+          <details class="insight"><summary>Why use a decorator?</summary><p>At import time, the decorator registers a relationship between an HTTP method, a URL path, and your function. When a request arrives, FastAPI uses that registration to choose which function to call.</p></details>
+        </section>
+
+        <section class="lesson" id="setup"><div class="lesson-heading"><span class="module-number">02 / ENVIRONMENT</span><h2>Try an example locally</h2><p>The guide works entirely in your browser. If you want to make real HTTP requests, copy one of its Python examples into a local file and run FastAPI separately.</p></div>
+          <div class="steps"><div><span>1</span><div><h3>Create and activate</h3><pre><code>py -m venv .venv
+.venv\Scripts\Activate.ps1</code></pre><p>Windows PowerShell commands. If <code>py</code> is unavailable, install Python 3.10+ and use its launcher.</p></div></div><div><span>2</span><div><h3>Install FastAPI</h3><pre><code>py -m pip install "fastapi[standard]"</code></pre></div></div><div><span>3</span><div><h3>Copy and run an example</h3><pre><code>fastapi dev main.py</code></pre><p>Save the first endpoint or the optional <a href="#crud-example">complete CRUD example</a> below as <code>main.py</code>. Open <code>http://127.0.0.1:8000/docs</code> to send real requests. <code>/redoc</code> is an alternative reference view.</p></div></div></div>
+          <div class="callout"><b>Development only</b><p><code>fastapi dev</code> reloads code as you edit. It is a development server, and the dictionary data resets when the process restarts.</p></div>
+        </section>
+
+        <section class="lesson" id="path"><div class="lesson-heading"><span class="module-number">03 / PATH PARAMETERS</span><h2>From a URL to a Python argument</h2><p>A path value identifies a specific resource. FastAPI takes the text from the URL, validates it against the annotation, and passes the converted value to your function.</p></div>
+          <div class="two-col"><article class="panel"><h3>Read a function signature</h3><pre><code>def add(a: int, b: int) -> int:
+    return a + b
+
+answer = add(5, 3)  # 8</code></pre><p><code>a</code> and <code>b</code> are parameters; <code>5</code> and <code>3</code> are arguments. <code>: int</code> and <code>-> int</code> are type hints. Only <code>return</code> sends a value back.</p></article><article class="panel"><h3>Bind a path value</h3><pre><code>@app.get("/students/{student_id}")
+def get_student(student_id: int):
+    if student_id not in students:
+        raise HTTPException(404, "Student not found")
+    return students[student_id]</code></pre><p>For <code>GET /students/2</code>, FastAPI calls <code>get_student(student_id=2)</code>. The placeholder and function parameter must share the name.</p></article></div>
+          <div class="comparison"><div><b>GET /students/abc</b><span>422 · “abc” cannot be parsed as an integer. The function does not run.</span></div><div><b>GET /students/999</b><span>404 · The integer is valid, but your code cannot find that record.</span></div></div>
+          <details class="insight"><summary>What about route order?</summary><p>Declare a fixed route such as <code>/students/all</code> before <code>/students/{student_id}</code>. Otherwise the dynamic route may match “all” first and produce a validation error. A path such as <code>/students/2/courses/5</code> can bind both <code>student_id</code> and <code>course_id</code>.</p></details>
+        </section>
+
+        <section class="lesson" id="query"><div class="lesson-heading"><span class="module-number">04 / QUERY PARAMETERS</span><h2>Identify, filter, and page</h2><p>The path usually identifies a resource. The query string often adjusts how you read it: search, filter, sort, or paginate.</p></div>
+          <div class="url-anatomy"><span class="method get">GET</span><code>/students/<mark>5</mark>?<em>include_courses=true</em></code><div><span><b>5</b> → path: which student?</span><span><b>include_courses</b> → query: what extra data?</span></div></div>
+          <div class="three-col"><article class="panel"><span class="small-label">REQUIRED</span><pre><code>def search(name: str):</code></pre><p><code>/search</code> → 422<br><code>/search?name=Ali</code> → “Ali”</p></article><article class="panel"><span class="small-label">DEFAULT</span><pre><code>def list_students(limit: int = 10):</code></pre><p>Without <code>limit</code>, the value is 10. With <code>?limit=5</code>, it is 5.</p></article><article class="panel"><span class="small-label">OPTIONAL</span><pre><code>def list_students(name: str | None = None):</code></pre><p>The <code>= None</code> default makes omission possible. The union type alone does not.</p></article></div>
+          <div class="two-col"><article class="panel"><h3>How FastAPI decides</h3><pre><code>@app.get("/students/{student_id}")
+def read(student_id: int,
+         details: bool = False): ...</code></pre><p><code>student_id</code> appears in the path template. The other scalar parameter, <code>details</code>, comes from the query string. A Pydantic model parameter is normally read from the JSON body.</p></article><article class="panel"><h3>Pagination is a slice</h3><pre><code>result = students[skip : skip + limit]</code></pre><p><code>?skip=2&limit=2</code> selects the third and fourth items. The optional example constrains <code>skip ≥ 0</code> and <code>1 ≤ limit ≤ 100</code>. Slicing a list is illustrative; a database should page in its query.</p></article></div>
+        </section>
+
+        <section class="lesson" id="crud"><div class="lesson-heading"><span class="module-number">05 / CRUD API</span><h2>Give each operation a clear job</h2><p>Imagine students stored in a Python dictionary. This simple model helps you reason about HTTP behavior before considering a real database.</p></div>
+          <div class="request-map"><div><span class="small-label">PATH EXAMPLE</span><b>/students/<mark>2</mark></b><small><code>2</code> identifies a student.</small></div><div><span class="small-label">QUERY EXAMPLE</span><b>/students?min_age=21</b><small><code>21</code> filters a list.</small></div><div><span class="small-label">BODY EXAMPLE</span><b>POST /students</b><small>JSON supplies a new student's fields.</small></div></div>
+          <section class="route-lens" aria-labelledby="route-lens-title">
+            <div class="route-lens-head"><div><span class="small-label">VISUAL WALKTHROUGH</span><h3 id="route-lens-title">Where does each value come from—and where does it go?</h3><p>The decorator is a matching rule registered when Python imports the file. Later, the client sends an actual request. FastAPI connects its values to function parameters before calling your code.</p></div><label for="route-case">Choose a request<select id="route-case"><option value="get_one">GET one student</option><option value="get_list">GET with a query</option><option value="post">POST a student</option><option value="put">PUT a student</option><option value="patch">PATCH a student</option><option value="delete">DELETE a student</option><option value="bad_id">Invalid path: abc</option><option value="missing_id">Missing student: 999</option></select></label></div>
+            <p class="route-rule"><b>Read the three places:</b> <code>/students/{student_id}</code> is the route pattern; <code>/students/2</code> is the client's URL; <code>student_id: int</code> is the function parameter that receives <code>2</code>.</p>
+            <div class="route-chain" aria-live="polite"><div class="route-step"><span class="step-tag">01 · CLIENT SENDS</span><code id="route-request">GET /students/2</code><p id="route-request-note">The browser sends a GET request to this actual URL.</p></div><div class="route-step"><span class="step-tag">02 · FASTAPI MATCHES</span><code id="route-decorator">@app.get("/students/{student_id}")</code><p id="route-decorator-note">GET must match GET; {student_id} is a named slot for one path segment.</p></div><div class="route-step"><span class="step-tag">03 · FUNCTION RECEIVES</span><code id="route-signature">def get_student(student_id: int):</code><p id="route-input-note">FastAPI converts URL text "2" to integer 2 and calls get_student(student_id=2).</p></div><div class="route-step"><span class="step-tag" id="route-logic-tag">04 · YOUR CODE RUNS</span><code id="route-logic">students[2] → Sara</code><p id="route-logic-note">The function reads a record from the dictionary. FastAPI did not look up the student for you.</p></div><div class="route-step"><span class="step-tag">05 · CLIENT RECEIVES</span><code id="route-output">200 {"id":2,"name":"Sara","age":22}</code><p id="route-output-note">The returned dictionary becomes a JSON response.</p></div></div>
+            <div class="route-lens-foot"><p id="route-takeaway"><b>The bridge:</b> <code>{student_id}</code> in the path pattern has the same name as <code>student_id</code> in the function. The function name <code>get_student</code> does not determine the URL.</p><button class="text-button" id="load-route-lab" type="button">Load this request in the lab ↓</button></div>
+            <p class="route-assumption">These examples assume the initial Ali and Sara records. Reset the lab if you previously changed its data.</p>
+          </section>
+          <div class="endpoint-list"><div><span class="method get">GET</span><code>/students</code><span>List, search, filter, page</span><strong>200</strong></div><div><span class="method get">GET</span><code>/students/{student_id}</code><span>Read one; missing ID → 404</span><strong>200</strong></div><div><span class="method post">POST</span><code>/students</code><span>Create with validated body</span><strong>201</strong></div><div><span class="method put">PUT</span><code>/students/{student_id}</code><span>Replace name and age</span><strong>200</strong></div><div><span class="method patch">PATCH</span><code>/students/{student_id}</code><span>Update supplied fields only</span><strong>200</strong></div><div><span class="method delete">DELETE</span><code>/students/{student_id}</code><span>Remove; empty response body</span><strong>204</strong></div></div>
+          <div class="two-col"><article class="panel"><h3>PUT: complete editable state</h3><pre><code>PUT /students/1
+{"name":"Ali Khan","age":21}</code></pre><p>Both fields are required. The URL ID stays the same. Our example returns 404 if the student does not exist; some other APIs choose to create on PUT.</p></article><article class="panel"><h3>PATCH: supplied fields only</h3><pre><code>PATCH /students/1
+{"age":23}</code></pre><p><code>model_dump(exclude_unset=True)</code> keeps only fields sent by the client. The API rejects explicit <code>null</code> because name and age cannot be null in the stored student.</p></article></div>
+          <details class="insight"><summary>Why use Pydantic models?</summary><p><code>StudentIn</code> describes the create and replace body; <code>StudentPatch</code> allows omitted fields; <code>StudentOut</code> describes responses. FastAPI validates incoming data and generates OpenAPI documentation from these models. Python type hints by themselves do not validate ordinary function calls.</p></details>
+          <details class="insight"><summary>What are the important status codes?</summary><p><b>200</b> successful read or update; <b>201</b> created; <b>204</b> success with no body; <b>400</b> application-defined bad request; <b>401</b> authentication required; <b>403</b> forbidden; <b>404</b> record missing; <b>422</b> validation failure; <b>500</b> unexpected server failure. Status codes describe the result; a return value alone does not save data.</p></details>
+          <details class="insight" id="crud-example"><summary>Optional: reveal a complete runnable example</summary><p>Copy this into <code>main.py</code> if you want to compare the browser lab with real FastAPI responses. It stores data in memory and resets on restart.</p><pre><code>from fastapi import FastAPI, HTTPException, Query
+from pydantic import BaseModel, Field
+
+app = FastAPI()
+
+class StudentIn(BaseModel):
+    name: str = Field(min_length=1)
+    age: int = Field(ge=0)
+
+class StudentPatch(BaseModel):
+    name: str | None = Field(default=None, min_length=1)
+    age: int | None = Field(default=None, ge=0)
+
+students = {
+    1: {"id": 1, "name": "Ali", "age": 20},
+    2: {"id": 2, "name": "Sara", "age": 22},
+}
+next_id = 3
+
+def find_student(student_id: int):
+    if student_id not in students:
+        raise HTTPException(404, "Student not found")
+    return students[student_id]
+
+@app.get("/students")
+def get_students(
+    search: str | None = None,
+    min_age: int | None = Query(default=None, ge=0),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+):
+    result = list(students.values())
+    if search is not None:
+        result = [s for s in result
+                  if search.casefold() in s["name"].casefold()]
+    if min_age is not None:
+        result = [s for s in result if s["age"] >= min_age]
+    return result[skip:skip + limit]
+
+@app.get("/students/{student_id}")
+def get_student(student_id: int):
+    return find_student(student_id)
+
+@app.post("/students", status_code=201)
+def create_student(student: StudentIn):
+    global next_id
+    created = {"id": next_id, **student.model_dump()}
+    students[next_id] = created
+    next_id += 1
+    return created
+
+@app.put("/students/{student_id}")
+def replace_student(student_id: int, student: StudentIn):
+    find_student(student_id)
+    students[student_id] = {"id": student_id, **student.model_dump()}
+    return students[student_id]
+
+@app.patch("/students/{student_id}")
+def update_student(student_id: int, changes: StudentPatch):
+    current = find_student(student_id)
+    updates = changes.model_dump(exclude_unset=True)
+    if any(value is None for value in updates.values()):
+        raise HTTPException(422, "name and age cannot be null")
+    current.update(updates)
+    return current
+
+@app.delete("/students/{student_id}", status_code=204)
+def delete_student(student_id: int):
+    find_student(student_id)
+    del students[student_id]
+    return None</code></pre><p><code>find_student</code> centralizes the 404 rule. <code>Query</code> constrains pagination. <code>exclude_unset=True</code> distinguishes omitted PATCH fields from fields explicitly sent as <code>null</code>. <code>global next_id</code> only updates this teaching example’s counter; a real database would generate IDs.</p></details>
+        </section>
+
+        <section class="lesson lab-section" id="lab"><div class="lesson-heading"><span class="module-number">INTERACTIVE / REQUEST LAB</span><h2>Predict it. Send it. Inspect it.</h2><p>This browser simulation starts with Ali and Sara and shows how each request changes the result. It does not contact a Python server; the optional code example can be run in <code>/docs</code> separately.</p></div>
+          <div class="lab"><div class="lab-controls"><div class="field-row"><label for="method">Method</label><label for="request-path">Path and query</label></div><div class="request-inputs"><select id="method" aria-label="HTTP method"><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select><input id="request-path" aria-label="Path and query" value="/students" spellcheck="false"></div><label for="request-body">JSON body <span>(POST, PUT, PATCH)</span></label><textarea id="request-body" spellcheck="false" rows="6" placeholder='{"name":"Zain","age":24}'></textarea><div class="lab-actions"><button id="send-request" class="button primary" type="button">Send simulated request →</button><button id="reset-lab" class="text-button" type="button">Reset data</button></div><p class="lab-hint">Try <code>GET /students/abc</code>, <code>GET /students/999</code>, then <code>POST /students</code>.</p></div><div class="lab-response"><div class="response-top"><span>RESPONSE</span><span id="response-status" class="response-status">200 OK</span></div><pre id="response-body" aria-live="polite"></pre><p id="response-explanation" class="response-explanation"></p><div class="trace-panel"><h3>Where each value goes</h3><ol id="response-trace" aria-live="polite"></ol></div></div></div>
+        </section>
+
+        <section class="lesson" id="practice"><div class="lesson-heading"><span class="module-number">PRACTICE / RETRIEVAL</span><h2>Can you explain what happens?</h2><p>Answer from the request, not from memory. Try the same sequence in the lab, or in Swagger UI if you choose to run the optional Python example.</p></div>
+          <div class="quiz" id="quiz"><div class="quiz-progress" id="quiz-progress">0 / 4 correct</div><div class="question" data-answer="a"><p><b>01.</b> <code>GET /students/8?details=true</code> reaches <code>def read(student_id: int, details: bool = False)</code>. What arrives?</p><button data-choice="a">student_id=8, details=True</button><button data-choice="b">student_id=True, details=8</button><button data-choice="c">student_id=8, details=False</button><small class="feedback" aria-live="polite"></small></div><div class="question" data-answer="b"><p><b>02.</b> For <code>def list_students(skip: int = 0, limit: int = 10)</code>, what does <code>GET /students?limit=5</code> pass?</p><button data-choice="a">skip=5, limit=10</button><button data-choice="b">skip=0, limit=5</button><button data-choice="c">skip=None, limit=5</button><small class="feedback" aria-live="polite"></small></div><div class="question" data-answer="c"><p><b>03.</b> What happens for <code>GET /students/abc</code> when <code>student_id: int</code>?</p><button data-choice="a">The function receives 0</button><button data-choice="b">The function receives “abc”</button><button data-choice="c">FastAPI responds 422 before the function runs</button><small class="feedback" aria-live="polite"></small></div><div class="question" data-answer="a"><p><b>04.</b> You send <code>PATCH /students/3</code> with <code>{"age":25}</code>. What should remain unchanged?</p><button data-choice="a">The student’s name and ID</button><button data-choice="b">Only the age</button><button data-choice="c">Nothing; PATCH replaces the record</button><small class="feedback" aria-live="polite"></small></div></div>
+          <div class="exercise"><div><span class="small-label">HANDS-ON EXERCISE</span><h3>One complete student lifecycle</h3><p>Use the request lab. Predict each status and response before sending it.</p></div><ol><li>GET all students.</li><li>POST Zain, age 24; note the new ID.</li><li>GET that ID and filter with <code>?min_age=22</code>.</li><li>PUT the full name and age 25.</li><li>PATCH only the age to 26.</li><li>DELETE, then GET the same ID and explain 404.</li></ol><details><summary>Reveal the key observations</summary><p>POST returns 201 and the generated ID. PUT needs both editable fields. PATCH preserves the omitted name. DELETE returns 204 with no body. The final GET returns 404 because the dictionary no longer has that ID.</p></details></div>
+          <div class="callout"><b>Quick revision</b><p>Path identifies a resource; query adjusts a request; body sends structured data. FastAPI validates incoming values, while your code decides what to read or change. PUT replaces the complete editable state; PATCH applies supplied fields. A valid ID type can still point to a missing record.</p></div>
+        </section>
+        <footer><span>FastAPI Field Guide · Modules 1–5</span><span>Next: data models, persistence, and dependencies</span><a href="#top">Back to top ↑</a></footer>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
